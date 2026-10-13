@@ -7,7 +7,7 @@
   if (CQ.__constantsLoaded) return;
   CQ.__constantsLoaded = true;
 
-  CQ.VERSION = '1.2.1';
+  CQ.VERSION = '1.3.0';
   CQ.NS = 'cq-ai-answer';
 
   CQ.MSG = {
@@ -121,6 +121,7 @@
     autoAnswer: false,                         // 识别后立即开始 AI 答题
     previewFirst: true,                        // 先预览结果，手动点应用才填
     autoSubmit: false,                         // 填完后自动交卷（危险，默认关）
+    autoNext: false,                            // 交卷后自动跳转下一章节答题页（默认关）
     minConfidence: 0.0,                        // 低于此置信度的题不填写
     enableCache: true,                         // 题目-答案本地缓存
     includeImages: false,                      // 将题干图片发给支持视觉的模型

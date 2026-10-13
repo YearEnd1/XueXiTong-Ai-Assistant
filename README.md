@@ -15,6 +15,7 @@ A Chromium (Edge) browser extension that auto-detects **Chaoxing** answer pages,
 - **悬浮面板 / Floating panel**：Shadow DOM 隔离样式；全页面可拖动（已钳制在视口内）；答题页自动识别，非答题页常驻不误报。
 - **答案检测 / Answer verification**（v1.2.0）：首次回答后独立二次核验，不一致的题目单独重新回答（可在设置页 / 弹窗中开关）。
 - **安全默认 / Safe defaults**：预览优先（不自动回填）、自动交卷关闭、自动识别开启、答案缓存开启。
+- **自动跳转下一章节 / Auto next chapter**（v1.3.0）：交卷成功后自动点击「下一章节/下一节」入口进入下一章答题页（可在设置页 / 弹窗开关）。
 - **视觉模型 / Vision**：图片题可在设置页开启「启用视觉模型」并选择 vision 预设。
 
 ---
@@ -107,7 +108,7 @@ For study assistance only. Please follow your school's academic integrity rules 
 - 纯原生 JavaScript + Chrome MV3 API，无构建步骤、无第三方运行时依赖。
 - `node test/smoke.mjs`：纯逻辑冒烟测试（解析、缓存键、判断题映射、答案比较器、预设完整性）。
 - `test/cdp-*.mjs` + `test/serve.js`：基于 CDP 的浏览器回归（需本机 Edge；详见测试脚本注释）。
-- 版本历史：v1.0 基础答题  v1.1 悬浮窗常驻/识别修复  v1.2 多空填空修复 + 答案检测  v1.2.1 Qwen 预设扩充。
+- 版本历史：v1.0 基础答题  v1.1 悬浮窗常驻/识别修复  v1.2 多空填空修复 + 答案检测  v1.2.1 Qwen 预设扩充  v1.3.0 交卷后自动跳转下一章节（可开关）。
 
 ---
 

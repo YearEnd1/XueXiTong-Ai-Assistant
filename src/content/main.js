@@ -224,6 +224,7 @@
         if (typeof btn.click === 'function' && btn.tagName !== 'A') btn.click();
       } catch (e) { /* ignore */ }
       toast('已点击交卷按钮，请留意页面确认弹窗');
+      if (state.cfg.autoNext) nextChapterFlow();
     };
     if (silent || window.confirm('确定要提交试卷吗？提交后一般无法修改。')) doSubmit();
   }
@@ -239,6 +240,43 @@
       }
       const oc = String(el.getAttribute('onclick') || '');
       if (/submit|交卷|saveExam|handin/i.test(oc)) return el;
+    }
+    return null;
+  }
+
+  /* ---------- 交卷后自动跳转下一章节 ---------- */
+  function nextChapterFlow() {
+    const attempts = [2500, 4000, 6000, 8500];
+    let done = false;
+    for (let i = 0; i < attempts.length; i++) {
+      setTimeout(() => {
+        if (done) return;
+        const el = findNextChapterBtn();
+        if (!el) {
+          if (i === attempts.length - 1) toast('自动跳转：未找到下一章节入口，请手动跳转', '');
+          return;
+        }
+        done = true;
+        const r = el.getBoundingClientRect();
+        const opts = { bubbles: true, cancelable: true, view: root, clientX: r.left + 4, clientY: r.top + 4 };
+        try {
+          el.dispatchEvent(new MouseEvent('click', opts));
+          if (typeof el.click === 'function' && el.tagName !== 'A') el.click();
+        } catch (e) { /* ignore */ }
+        toast('已点击下一章节入口，正在跳转', 'ok');
+      }, attempts[i]);
+    }
+  }
+
+  function findNextChapterBtn() {
+    const cands = document.querySelectorAll('a,button,div[class*=btn i],span[class*=btn i],[class*=next i],[class*=catalog i],.jb_btn');
+    for (const el of Array.from(cands)) {
+      const t = U.norm(el.innerText || el.value || el.getAttribute('title') || '');
+      if (!t || t.length > 14) continue;
+      if (/^(下一章节|下一章|下一节|下一课|下一任务|继续下一节|继续学习|next)$/.test(t)) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) return el;
+      }
     }
     return null;
   }

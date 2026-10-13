@@ -78,6 +78,7 @@ ok('compareAnswer: fullwidth unified', compareAnswer(['Ａ'], ['A']) === true);
 ok('compareAnswer: empty never equal', compareAnswer([], []) === false && compareAnswer([''], ['']) === false);
 // 11. 新配置项与填空规则
 ok('config: verifyAnswers default off', CQ.DEFAULT_CONFIG.verifyAnswers === false);
+ok('config: autoNext default off', CQ.DEFAULT_CONFIG.autoNext === false);
 ok('prompt: fill blanks count rule', CQ.PROMPT.system.includes('blanks 字段一致'));
 
 console.log(failed ? `SMOKE FAILED: ${failed}` : 'SMOKE ALL PASS');

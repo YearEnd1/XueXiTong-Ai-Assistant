@@ -16,7 +16,7 @@ async function init() {
   const c = await send({ type: MSG.GET_CONFIG });
   cfg = c.config;
   bind('autoDetect', cfg.autoDetect); bind('autoAnswer', cfg.autoAnswer);
-  bind('previewFirst', cfg.previewFirst); bind('verifyAnswers', cfg.verifyAnswers); bind('autoSubmit', cfg.autoSubmit);
+  bind('previewFirst', cfg.previewFirst); bind('verifyAnswers', cfg.verifyAnswers); bind('autoSubmit', cfg.autoSubmit); bind('autoNext', cfg.autoNext);
   document.getElementById('apiState').textContent = cfg.apiKey ? '已配置' : '未配置';
   document.getElementById('apiState').style.color = cfg.apiKey ? '#16a34a' : '#dc2626';
   document.getElementById('sub').textContent = '模型：' + (cfg.model || '未配置');

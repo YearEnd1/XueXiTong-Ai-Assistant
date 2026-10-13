@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "学习通 AI 自动答题助手",
+  "version": "1.2.1",
+  "description": "自动识别超星学习通/考试答题页，调用大模型 API 生成并填写答案；默认预览确认，不自动提交。",
+  "minimum_chrome_version": "114",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "学习通 AI 自动答题助手",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "notifications"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.chaoxing.com/*",
+        "*://*.chaoxing.cn/*",
+        "*://*.xueyinonline.com/*",
+        "*://*.edu.cn/*"
+      ],
+      "all_frames": true,
+      "match_origin_as_fallback": true,
+      "run_at": "document_idle",
+      "js": [
+        "src/common/constants.js",
+        "src/common/util.js",
+        "src/common/store.js",
+        "src/content/extractor.js",
+        "src/content/filler.js",
+        "src/content/panel.js",
+        "src/content/main.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["*://*.chaoxing.com/*", "*://*.chaoxing.cn/*", "*://*.xueyinonline.com/*", "*://*.edu.cn/*"]
+    }
+  ]
+}

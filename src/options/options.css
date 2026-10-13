@@ -1,0 +1,31 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f1f5f9; color: #1e293b; font-family: "Microsoft YaHei","PingFang SC",system-ui,sans-serif; }
+.wrap { max-width: 780px; margin: 0 auto; padding: 24px 16px 60px; }
+header h1 { font-size: 20px; margin: 0 0 6px; }
+header p { font-size: 12px; color: #64748b; margin: 0 0 16px; }
+section { background: #fff; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+h2 { font-size: 14px; margin: 0 0 12px; color: #2563eb; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #475569; }
+label.wide { grid-column: 1 / -1; }
+input, select, textarea { padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #bfdbfe; border-color: #2563eb; }
+textarea { resize: vertical; }
+.rowflex { display: flex; gap: 6px; }
+.rowflex input { flex: 1; }
+code { background: #eff6ff; padding: 1px 5px; border-radius: 4px; }
+.checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.checks label { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; }
+.checks input { width: 15px; height: 15px; accent-color: #2563eb; }
+.checks .danger { color: #b91c1c; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+button { padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 13px; }
+button:hover { background: #f1f5f9; }
+button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+button.primary:hover { background: #1d4ed8; }
+.out { font-size: 12px; color: #475569; }
+.out.ok { color: #16a34a; }
+.out.err { color: #dc2626; }
+.hint { font-size: 11px; color: #94a3b8; line-height: 1.6; margin: 10px 0 0; }
+footer { text-align: center; font-size: 11px; color: #94a3b8; }
+@media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }

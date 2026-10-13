@@ -1,0 +1,21 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 320px; font-family: "Microsoft YaHei","PingFang SC",system-ui,sans-serif; background: #f1f5f9; color: #1e293b; }
+header { display: flex; align-items: center; gap: 8px; padding: 12px; background: linear-gradient(135deg,#2563eb,#4f46e5); color: #fff; }
+.logo { font-size: 22px; }
+.title { font-size: 14px; font-weight: 700; }
+.sub { font-size: 11px; opacity: .85; margin-top: 2px; }
+.card { background: #fff; margin: 10px; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+.row .k { color: #64748b; }
+.row .v { font-weight: 600; }
+.btnrow { display: flex; gap: 8px; margin-top: 8px; }
+button { flex: 1; padding: 7px 4px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 12px; cursor: pointer; }
+button:hover { background: #f1f5f9; }
+button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+button.primary:hover { background: #1d4ed8; }
+.switch { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 0; cursor: pointer; }
+.switch input { width: 15px; height: 15px; accent-color: #2563eb; }
+.switch.danger { color: #b91c1c; }
+footer { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 12px; }
+footer button { flex: 0 0 auto; padding: 7px 12px; }
+.ver { font-size: 11px; color: #94a3b8; }

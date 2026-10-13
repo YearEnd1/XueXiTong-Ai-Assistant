@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <span class="logo"></span>
+    <div>
+      <div class="title">学习通 AI 答题助手</div>
+      <div class="sub" id="sub">加载中</div>
+    </div>
+  </header>
+
+  <section class="card" id="tabCard">
+    <div class="row"><span class="k">当前页面</span><span class="v" id="pageKind"></span></div>
+    <div class="row"><span class="k">识别题目</span><span class="v" id="pageCount"></span></div>
+    <div class="row"><span class="k">API Key</span><span class="v" id="apiState"></span></div>
+    <div class="btnrow">
+      <button id="btnAnswer" class="primary">立即 AI 答题</button>
+      <button id="btnRescan">重新识别</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <label class="switch"><input type="checkbox" id="autoDetect"><span>自动识别答题页</span></label>
+    <label class="switch"><input type="checkbox" id="autoAnswer"><span>识别后自动答题</span></label>
+    <label class="switch"><input type="checkbox" id="previewFirst"><span>先预览、手动应用</span></label>
+    <label class="switch"><input type="checkbox" id="verifyAnswers"><span>答案检测（核验不一致重答）</span></label>
+    <label class="switch danger"><input type="checkbox" id="autoSubmit"><span>填完自动交卷（危险）</span></label>
+  </section>
+
+  <footer>
+    <button id="btnOptions">打开完整设置</button>
+    <span class="ver" id="ver"></span>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>

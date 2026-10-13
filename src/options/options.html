@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>设置 - 学习通 AI 自动答题助手</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1> 学习通 AI 自动答题助手  设置</h1>
+      <p>配置模型 API 与答题行为。设置自动保存；API Key 仅保存在本机浏览器。</p>
+    </header>
+
+    <section>
+      <h2>模型 API</h2>
+      <div class="grid2">
+        <label>接口协议
+          <select id="provider">
+            <option value="openai">OpenAI 兼容（/chat/completions）</option>
+            <option value="anthropic">Anthropic（/v1/messages）</option>
+            <option value="zen">免密网关 Zen（opencode.ai 公开车道）</option>
+            <option value="kilo">免密网关 Kilo（api.kilo.ai 免费池）</option>
+            <option value="workbuddy">WorkBuddy（腾讯 Copilot，需登录令牌）</option>
+          </select>
+        </label>
+        <label>模型选择
+          <select id="modelPreset"><option value="">自定义（手动输入模型名）</option></select>
+        </label>
+        <label>模型名称
+          <input id="model" placeholder="deepseek-chat / gpt-4o-mini / glm-4-flash">
+        </label>
+        <label class="wide">API 地址（Base URL）
+          <input id="baseUrl" placeholder="https://api.deepseek.com/v1">
+        </label>
+        <label class="wide">API Key
+          <div class="rowflex">
+            <input id="apiKey" type="password" placeholder="sk-">
+            <button id="showKey" class="ghost">显示</button>
+          </div>
+        </label>
+        <label>温度 Temperature
+          <input id="temperature" type="number" step="0.1" min="0" max="2">
+        </label>
+        <label>最大输出 tokens
+          <input id="maxTokens" type="number" min="128" max="32000">
+        </label>
+        <label>请求超时（毫秒）
+          <input id="timeoutMs" type="number" min="5000" max="300000">
+        </label>
+        <label>每轮题目数（1-20）
+          <input id="batchSize" type="number" min="1" max="20">
+        </label>
+      </div>
+      <label class="wide">附加请求头（每行一条，如 <code>X-Token: abc</code>，用于自定义网关鉴权）
+        <textarea id="extraHeaders" rows="2" placeholder="Authorization: Bearer xxx"></textarea>
+      </label>
+      <label class="wide">自定义系统提示词（留空使用内置提示词，需保证只输出 JSON 数组的约束仍在）
+        <textarea id="systemPrompt" rows="4"></textarea>
+      </label>
+      <div class="actions">
+        <button id="test" class="primary">测试连接</button>
+        <button id="grantHost" class="ghost">申请 API 站点访问权限</button>
+        <span id="testOut" class="out"></span>
+      </div>
+      <p class="hint">说明：模型接口域名需获得访问权限（扩展不能随意跨域请求）。保存或点击上方申请按钮后按提示授权即可，常见服务：DeepSeek、OpenAI、智谱、通义、Kimi、SiliconFlow、Ollama、one-api 中转等。</p>
+    </section>
+
+    <section>
+      <h2>答题行为</h2>
+      <div class="checks">
+        <label><input type="checkbox" id="autoDetect"> 自动识别学习通答题网页</label>
+        <label><input type="checkbox" id="autoAnswer"> 识别到题目后自动开始 AI 答题</label>
+        <label><input type="checkbox" id="previewFirst"> 先预览答案，点应用才填写（推荐）</label>
+        <label><input type="checkbox" id="enableCache"> 启用本地题库缓存（相同题目不再重复调用 API）</label>
+        <label><input type="checkbox" id="verifyAnswers"> 答案检测（首次回答后独立核验，不一致的题单独重答，API 用量增加）</label>
+        <label><input type="checkbox" id="includeImages"> 启用视觉模型（把题干图片发给模型，需模型支持视觉）</label>
+        <label class="danger"><input type="checkbox" id="autoSubmit"> 填完后自动交卷（危险：确认前会弹窗询问）</label>
+      </div>
+      <p class="hint" id="visionHint"></p>
+      <div class="grid2">
+        <label>两轮请求间隔（毫秒）
+          <input id="requestDelayMs" type="number" min="0" max="60000">
+        </label>
+        <label>最低置信度（低于此值的答案不填写，0-1）
+          <input id="minConfidence" type="number" step="0.05" min="0" max="1">
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>数据</h2>
+      <div class="actions">
+        <button id="clearCache" class="ghost">清空题库缓存</button>
+        <button id="export" class="ghost">导出配置</button>
+        <button id="import" class="ghost">导入配置</button>
+        <input type="file" id="importFile" accept=".json" hidden>
+        <span id="dataOut" class="out"></span>
+      </div>
+      <p class="hint">缓存与配置保存在 chrome.storage 本地；导出文件不含密码以外的敏感信息，但请勿将含 API Key 的配置外传。</p>
+    </section>
+
+    <footer>v<span id="ver"></span>  仅供学习辅助，请勿用于违反课程规定或考试纪律的场景。</footer>
+  </div>
+  <script src="../common/constants.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

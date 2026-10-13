@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>学习通作业答题（模拟页）</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f4f6f9; margin: 0; }
+  .page { max-width: 900px; margin: 20px auto; background: #fff; padding: 24px; border-radius: 8px; }
+  .bar { background: linear-gradient(135deg,#2563eb,#4f46e5); color: #fff; padding: 14px 24px; font-size: 16px; }
+  .TiMu, .questionLi { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; background: #fff; }
+  .Zy_TItle, .mark_name { font-size: 14px; line-height: 1.7; }
+  .Zy_ulTop ul, .mark_letter { list-style: none; padding: 4px 0 0 12px; margin: 0; }
+  .Zy_ulTop li, .mark_letter li { padding: 4px 0; cursor: pointer; font-size: 14px; }
+  li.selected { color: #2563eb; font-weight: 600; }
+  li.selected a, li.selected label { color: #2563eb; }
+  textarea { width: 96%; min-height: 48px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-size: 14px; }
+  .btn { display: inline-block; background: #2563eb; color: #fff; padding: 9px 28px; border-radius: 6px; cursor: pointer; }
+  .tip { color: #64748b; font-size: 12px; }
+  h4 { margin: 18px 0 4px; color: #475569; }
+  .hidden-input { display: none; }
+</style>
+</head>
+<body>
+<div class="bar"> 学习通  课程作业（本地模拟页，用于测试扩展的识别与回填）</div>
+<div class="page">
+
+  <h4>一、作业样式（.TiMu 容器）</h4>
+
+  <div class="TiMu" data-questionid="q1001">
+    <div class="Zy_TItle clearfix">
+      <div class="fl"><i>1、</i><span>【单选题】</span>中国的首都是哪座城市？（2.0分）</div>
+    </div>
+    <div class="Zy_ulTop fl">
+      <ul>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1001" value="A"><a>A、上海</a></label></li>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1001" value="B"><a>B、北京</a></label></li>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1001" value="C"><a>C、广州</a></label></li>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1001" value="D"><a>D、深圳</a></label></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="TiMu" data-questionid="q1002">
+    <div class="Zy_TItle clearfix">
+      <div class="fl"><i>2、</i><span>【多选题】</span>下列属于操作系统的是？（3.0分）</div>
+    </div>
+    <div class="Zy_ulTop fl">
+      <ul>
+        <li><label><input class="hidden-input" type="checkbox" name="answer_q1002" value="A"><a>A、Windows</a></label></li>
+        <li><label><input class="hidden-input" type="checkbox" name="answer_q1002" value="B"><a>B、Linux</a></label></li>
+        <li><label><input class="hidden-input" type="checkbox" name="answer_q1002" value="C"><a>C、Python</a></label></li>
+        <li><label><input class="hidden-input" type="checkbox" name="answer_q1002" value="D"><a>D、macOS</a></label></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="TiMu" data-questionid="q1003">
+    <div class="Zy_TItle clearfix">
+      <div class="fl"><i>3、</i><span>【判断题】</span>地球绕太阳公转一周约为一年。（2.0分）</div>
+    </div>
+    <div class="Zy_ulTop fl">
+      <ul>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1003" value="A"><a>A、对</a></label></li>
+        <li><label><input class="hidden-input" type="radio" name="answer_q1003" value="B"><a>B、错</a></label></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="TiMu" data-questionid="q1004">
+    <div class="Zy_TItle clearfix">
+      <div class="fl"><i>4、</i><span>【填空题】</span>中华人民共和国的国庆日是每年的__月__日。（4.0分）</div>
+    </div>
+    <div class="Zy_ulTop fl">
+      <textarea id="answer_q1004" name="answer_q1004" placeholder="请填写答案，两个空用分号隔开"></textarea>
+    </div>
+  </div>
+
+  <div class="TiMu" data-questionid="q1005">
+    <div class="Zy_TItle clearfix">
+      <div class="fl"><i>5、</i><span>【简答题】</span>简述 HTTPS 相对 HTTP 的主要改进。（5.0分）</div>
+    </div>
+    <div class="Zy_ulTop fl">
+      <textarea id="answer_q1005" name="answer_q1005" rows="3" placeholder="请输入答案"></textarea>
+    </div>
+  </div>
+
+  <h4>二、考试样式（.questionLi 容器）</h4>
+
+  <div class="questionLi" data-questionid="q2001">
+    <h3 class="mark_name colorDeep"><span class="colorShallow">6</span><span class="colorShallow">（单选题）</span>下列哪个是标记语言？</h3>
+    <ul class="mark_letter">
+      <li><input class="hidden-input" type="radio" name="answer_q2001" value="A"><label>A、HTML</label></li>
+      <li><input class="hidden-input" type="radio" name="answer_q2001" value="B"><label>B、C++</label></li>
+      <li><input class="hidden-input" type="radio" name="answer_q2001" value="C"><label>C、Java</label></li>
+    </ul>
+  </div>
+
+  <div class="questionLi" data-questionid="q2002">
+    <h3 class="mark_name colorDeep"><span class="colorShallow">7</span><span class="colorShallow">（判断题）</span>IPv4 地址长度为 32 位。</h3>
+    <ul class="mark_letter">
+      <li><input class="hidden-input" type="radio" name="answer_q2002" value="A"><label>A、正确</label></li>
+      <li><input class="hidden-input" type="radio" name="answer_q2002" value="B"><label>B、错误</label></li>
+    </ul>
+  </div>
+
+  <div class="questionLi" data-questionid="q2003">
+    <h3 class="mark_name colorDeep"><span class="colorShallow">8</span><span class="colorShallow">（填空题）</span>万维网的英文缩写是____。</h3>
+    <div><input type="text" id="answer_q2003" name="answer_q2003" placeholder="答案"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:24px;">
+    <a class="btn" onclick="alert('（模拟）交卷成功！已填答案将被提交。')">交卷</a>
+    <p class="tip">提示：本页面为本地模拟页，若扩展面板未出现，请按 README 中的 host-resolver 方式加载。</p>
+  </div>
+</div>
+
+<script>
+  // 模拟学习通的自定义渲染：点击行选中隐藏 input
+  document.querySelectorAll('.Zy_ulTop li, .mark_letter li').forEach(li => {
+    li.addEventListener('click', () => {
+      const inp = li.querySelector('input');
+      if (!inp) return;
+      const siblings = li.parentElement.querySelectorAll('li');
+      siblings.forEach(s => s.classList.remove('selected'));
+      if (inp.type === 'checkbox') {
+        inp.checked = !inp.checked;
+        li.classList.toggle('selected', inp.checked);
+      } else {
+        inp.checked = true;
+        li.classList.add('selected');
+      }
+    });
+  });
+</script>
+</body>
+</html>

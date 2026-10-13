@@ -15,10 +15,17 @@ async function init() {
   document.getElementById('ver').textContent = 'v' + (chrome.runtime.getManifest().version || '1.0');
   const c = await send({ type: MSG.GET_CONFIG });
   cfg = c.config;
+  bind('masterEnabled', cfg.masterEnabled);
   bind('autoDetect', cfg.autoDetect); bind('autoAnswer', cfg.autoAnswer);
   bind('previewFirst', cfg.previewFirst); bind('verifyAnswers', cfg.verifyAnswers); bind('autoSubmit', cfg.autoSubmit); bind('autoNext', cfg.autoNext);
   document.getElementById('apiState').textContent = cfg.apiKey ? '已配置' : '未配置';
   document.getElementById('apiState').style.color = cfg.apiKey ? '#16a34a' : '#dc2626';
+  const masterEl = document.getElementById('masterEnabled');
+  const syncMaster = () => {
+    document.querySelectorAll('#switchCard .switch input').forEach(el => { el.disabled = !masterEl.checked; });
+  };
+  masterEl.addEventListener('change', syncMaster);
+  syncMaster();
   document.getElementById('sub').textContent = '模型：' + (cfg.model || '未配置');
   refreshTab();
 }

@@ -7,7 +7,7 @@
   if (CQ.__constantsLoaded) return;
   CQ.__constantsLoaded = true;
 
-  CQ.VERSION = '1.3.0';
+  CQ.VERSION = '1.3.1';
   CQ.NS = 'cq-ai-answer';
 
   CQ.MSG = {
@@ -117,6 +117,7 @@
     systemPrompt: '',                          // 留空使用内置提示词
     batchSize: 5,                              // 每轮请求发送的题目数
     requestDelayMs: 800,                       // 两轮请求之间的间隔
+    masterEnabled: true,                       // 总开关：关闭后 AI 答题/回填/交卷全部暂停（默认开）
     autoDetect: true,                          // 自动识别答题页
     autoAnswer: false,                         // 识别后立即开始 AI 答题
     previewFirst: true,                        // 先预览结果，手动点应用才填

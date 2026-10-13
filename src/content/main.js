@@ -14,6 +14,9 @@
 
   const isTop = root.top === root; // 仅顶层窗口常驻悬浮窗
 
+  // 总开关：关闭后 AI 答题/回填/交卷全部暂停（识别与面板仍可用）
+  function masterOn() { return !state.cfg || state.cfg.masterEnabled !== false; }
+
   // toast 只在挂载了面板的窗口显示（顶层，或识别到题目的子框架）
   function toast(text, tone) { if (state.panelMounted) CQ.panel.toast(text, tone); }
 
@@ -41,7 +44,7 @@
       const mo = new MutationObserver(U.debounce(() => rescan(), 1200));
       mo.observe(document.documentElement, { childList: true, subtree: true });
 
-      if (state.cfg.autoAnswer && state.scan.questions.length) {
+      if (state.cfg.autoAnswer && state.cfg.masterEnabled !== false && state.scan.questions.length) {
         state.autoSig = sigOf(state.scan.questions);
         setTimeout(() => answerFlow(), 800);
       }
@@ -64,7 +67,7 @@
       updateUi();
       report(det, scan);
       const sig = sigOf(scan.questions);
-      if (state.cfg.autoAnswer && scan.questions.length && sig !== state.autoSig) {
+      if (state.cfg.autoAnswer && state.cfg.masterEnabled !== false && scan.questions.length && sig !== state.autoSig) {
         state.autoSig = sig;
         answerFlow();
       }
@@ -85,7 +88,7 @@
     qs.forEach(q => { byType[q.type] = (byType[q.type] || 0) + 1; });
     const desc = Object.keys(byType).map(t => CQ.TYPE_LABELS[t] + '  ' + byType[t]).join('  ');
     CQ.panel.setStats(`已识别 ${qs.length} 题（${state.scan.kind || ''}）：${desc}`);
-    CQ.panel.setStatus('已就绪，点击AI 答题开始', 'ok');
+    CQ.panel.setStatus(state.cfg.masterEnabled === false ? '总开关已关闭，AI 功能已暂停' : '已就绪，点击AI 答题开始', state.cfg.masterEnabled === false ? '' : 'ok');
     CQ.panel.setFoot('模型：' + (state.cfg.model || '未配置') + (state.cfg.enableCache ? '  缓存开' : '  缓存关'));
   }
 
@@ -109,6 +112,7 @@
   /* ---------- AI 答题 ---------- */
   async function answerFlow() {
     if (state.answering) return;
+    if (!masterOn()) { toast('总开关已关闭，AI 答题已暂停', 'err'); return; }
     state.cfg = await CQ.store.get();
     const scan = CQ.extractor.scan(document);
     state.scan = scan;
@@ -197,6 +201,7 @@
 
   /* ---------- 回填 / 交卷 ---------- */
   function applyFlow() {
+    if (!masterOn()) { toast('总开关已关闭，回填已暂停', 'err'); return; }
     const qs = state.scan.questions;
     const res = CQ.filler.apply(qs, state.map, state.cfg);
     CQ.panel.showResults(res, state.map);
@@ -211,6 +216,7 @@
   }
 
   function submitFlow(silent) {
+    if (!masterOn()) { toast('总开关已关闭，交卷已暂停', 'err'); return; }
     const btn = findSubmitButton();
     if (!btn) {
       toast('未找到提交按钮，请手动交卷', 'err');

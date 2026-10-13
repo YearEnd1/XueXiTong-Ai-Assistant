@@ -7,7 +7,7 @@ const send = m => chrome.runtime.sendMessage(m);
 
 const TEXT_FIELDS = ['provider', 'model', 'baseUrl', 'apiKey', 'extraHeaders', 'systemPrompt'];
 const NUM_FIELDS = ['temperature', 'maxTokens', 'timeoutMs', 'batchSize', 'requestDelayMs', 'minConfidence'];
-const BOOL_FIELDS = ['autoDetect', 'autoAnswer', 'previewFirst', 'enableCache', 'verifyAnswers', 'includeImages', 'autoSubmit', 'autoNext'];
+const BOOL_FIELDS = ['masterEnabled', 'autoDetect', 'autoAnswer', 'previewFirst', 'enableCache', 'verifyAnswers', 'includeImages', 'autoSubmit', 'autoNext'];
 
 let cfg = null;
 

@@ -13,9 +13,16 @@ button { flex: 1; padding: 7px 4px; border-radius: 8px; border: 1px solid #cbd5e
 button:hover { background: #f1f5f9; }
 button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
 button.primary:hover { background: #1d4ed8; }
-.switch { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 0; cursor: pointer; }
-.switch input { width: 15px; height: 15px; accent-color: #2563eb; }
+.switch { position: relative; display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 46px 6px 0; min-height: 24px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 38px; height: 22px; border-radius: 999px; background: #cbd5e1; transition: background .18s; }
+.switch::before { content: ''; position: absolute; right: 19px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.28); transition: right .18s; z-index: 1; }
+.switch:has(input:checked)::after { background: #2563eb; }
+.switch:has(input:checked)::before { right: 3px; }
+.switch.master { font-weight: 600; }
 .switch.danger { color: #b91c1c; }
+.switch.danger:has(input:checked)::after { background: #dc2626; }
+.switch:has(input:disabled) { opacity: .45; cursor: default; }
 footer { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 12px; }
 footer button { flex: 0 0 auto; padding: 7px 12px; }
 .ver { font-size: 11px; color: #94a3b8; }

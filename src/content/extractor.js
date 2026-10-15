@@ -305,8 +305,10 @@
     const n = ctrls.length;
     const m = stem.match(/_{2,}|[（(]\s*[)）]|\[\s*\]/g);
     const pat = m ? m.length : 0;
+    // 学习通 dowork 作业/考试填空题：每个空位一个 .XztiHover1（span.fb 标「第N空」）
+    const xz = el.querySelectorAll ? el.querySelectorAll('.Zy_ulTk .XztiHover1, .Cy_ulTk .XztiHover1').length : 0;
     // 控件数少于题干空位数时按题干计数（多空题只填第一空的根因：blanks 报少了）
-    return Math.max(n, pat, 1);
+    return Math.max(n, pat, xz, 1);
   }
 
   function collectImages(el) {

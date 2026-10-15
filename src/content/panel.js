@@ -24,7 +24,8 @@
 .pill.err { background: #dc2626; }
 .head button {
   border: 0; background: rgba(255,255,255,.18); color: #fff; width: 22px; height: 22px;
-  border-radius: 6px; cursor: pointer; font-size: 13px; line-height: 1;
+  border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
 }
 .head button:hover { background: rgba(255,255,255,.32); }
 .body { padding: 10px; font-size: 12px; color: #1e293b; }
@@ -56,6 +57,13 @@
 .btns button:disabled { opacity: .5; cursor: not-allowed; }
 .foot { margin-top: 8px; color: #94a3b8; font-size: 11px; border-top: 1px dashed #e2e8f0; padding-top: 6px; }
 .collapsed .body { display: none; }
+.master { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 2px 8px; font-size: 12px; color: #475569; border-bottom: 1px dashed #e2e8f0; margin-bottom: 7px; }
+.master .sw { position: relative; flex: 0 0 auto; width: 38px; height: 22px; cursor: pointer; }
+.master .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+.master .sw i { display: block; width: 38px; height: 22px; border-radius: 999px; background: #cbd5e1; transition: background .18s; }
+.master .sw i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.28); transition: left .18s; }
+.master .sw input:checked + i { background: #2563eb; }
+.master .sw input:checked + i::after { left: 19px; }
 `;
 
   let host = null, shadow = null, els = {}, cfg = null;
@@ -84,13 +92,14 @@
   <div class="head" data-head>
     <span></span><span class="title">学习通 AI 答题助手</span>
     <span class="pill" data-pill>待识别</span>
-    <button title="折叠/展开" data-min></button>
-    <button title="关闭（刷新页面恢复）" data-close></button>
+    <button title="折叠/展开" data-min>−</button>
+    <button title="关闭（刷新页面恢复）" data-close>×</button>
   </div>
   <div class="body">
     <div class="status" data-status>正在初始化</div>
     <div class="stats" data-stats></div>
     <div class="results" data-results></div>
+    <div class="master"><span>总开关</span><label class="sw" title="一键暂停/恢复全部功能"><input type="checkbox" data-master><i></i></label></div>
     <div class="btns">
       <button data-cmd="rescan">识别</button>
       <button data-cmd="answer" class="primary">AI 答题</button>
@@ -106,7 +115,8 @@
       card, head: card.querySelector('[data-head]'), pill: card.querySelector('[data-pill]'),
       status: card.querySelector('[data-status]'), stats: card.querySelector('[data-stats]'),
       results: card.querySelector('[data-results]'), foot: card.querySelector('[data-foot]'),
-      min: card.querySelector('[data-min]'), close: card.querySelector('[data-close]')
+      min: card.querySelector('[data-min]'), close: card.querySelector('[data-close]'),
+      master: card.querySelector('[data-master]')
     };
 
     if (cfg.uiPos) {
@@ -114,9 +124,13 @@
       host.style.top = cfg.uiPos.y + 'px';
       host.style.right = 'auto';
     }
+    els.master.checked = cfg.masterEnabled !== false;
+    els.close.textContent = '×';
     if (cfg.uiCollapsed) {
       els.card.classList.add('collapsed');
       els.min.textContent = '+';
+    } else {
+      els.min.textContent = '−';
     }
 
     // 拖动
@@ -164,10 +178,16 @@
 
     els.min.addEventListener('click', () => {
       const collapsed = els.card.classList.toggle('collapsed');
-      els.min.textContent = collapsed ? '+' : '';
+      els.min.textContent = collapsed ? '+' : '−';
       CQ.store.get().then(c => CQ.store.set({ ...c, uiCollapsed: collapsed }));
     });
     els.close.addEventListener('click', () => P.destroy());
+    els.master.addEventListener('change', async () => {
+      const c = await CQ.store.get();
+      const nc = { ...c, masterEnabled: els.master.checked };
+      await CQ.store.set(nc);
+      if (P.onConfig) P.onConfig(nc);
+    });
     card.querySelectorAll('[data-cmd]').forEach(btn => {
       btn.addEventListener('click', () => {
         const fn = handlers.get(btn.dataset.cmd);

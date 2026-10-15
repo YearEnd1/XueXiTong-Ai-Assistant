@@ -109,7 +109,7 @@ For study assistance only. Please follow your school's academic integrity rules 
 - 纯原生 JavaScript + Chrome MV3 API，无构建步骤、无第三方运行时依赖。
 - `node test/smoke.mjs`：纯逻辑冒烟测试（解析、缓存键、判断题映射、答案比较器、预设完整性）。
 - `test/cdp-*.mjs` + `test/serve.js`：基于 CDP 的浏览器回归（需本机 Edge；详见测试脚本注释）。
-- 版本历史：v1.0 基础答题  v1.1 悬浮窗常驻/识别修复  v1.2 多空填空修复 + 答案检测  v1.2.1 Qwen 预设扩充  v1.3.0 交卷后自动跳转下一章节（可开关）  v1.3.1 总开关（一键暂停全部功能）。
+- 版本历史：v1.0 基础答题  |  v1.1 悬浮窗常驻/识别修复  |  v1.2 多空填空修复 + 答案检测  |  v1.2.1 Qwen 预设扩充  |  v1.3.0 交卷后自动跳转下一章节（可开关）  |  v1.3.1 总开关（一键暂停全部功能）  |  v1.3.2 总开关滑动样式 + 悬浮面板开关 + 学习通作业/考试填空题回填修复（UEditor/第N空结构）  |  v1.3.3 学习通 UEditor 桥接修复（事件冒泡 + 隐藏输入框同步 + 触发自动保存）
 
 ---
 

@@ -171,9 +171,85 @@
   }
 
   /* ---------- 填空 / 简答 ---------- */
+  /* ---------- 学习通 dowork 作业/考试填空题结构 ---------- */
+  // UEditor 是页面主世界对象：注入 <script> 事件桥，把 UE.setContent 送进页面上下文
+  function ensureUeBridge() {
+    try {
+      if (root.document.getElementById('__cq_ue_bridge')) return;
+      const s = root.document.createElement('script');
+      s.id = '__cq_ue_bridge';
+      s.textContent = 'function __cqUeFill(e) { try { if (e && e.__cqDone) return; if (e) e.__cqDone = true; document.documentElement.removeAttribute("data-cq-ue-ok"); var UE = window.UE; if (!UE || !UE.getEditor) return; var d = e.detail || {}; var name = d.name || d.id; var ed = UE.getEditor(name); if (!ed) return; ed.setContent(d.text || ""); var ta = document.getElementById(name) || (document.getElementsByName(name) || [])[0]; if (ta && (ta.tagName === "TEXTAREA" || ta.tagName === "INPUT")) { try { ta.value = d.text || ""; } catch (err2) {} } try { ed.fireEvent("contentChange"); } catch (err3) {} try { ed.fireEvent("contentchange"); } catch (err4) {} document.documentElement.setAttribute("data-cq-ue-ok", "1"); } catch (err) {} } window.addEventListener("__cq_set_ue", __cqUeFill); document.documentElement.addEventListener("__cq_set_ue", __cqUeFill);';
+      (root.document.head || root.document.documentElement).appendChild(s);
+      s.remove();
+    } catch (e) { /* CSP 拦截时走 iframe 兜底 */ }
+  }
+
+  function pageSetUE(el, text) {
+    try {
+      ensureUeBridge();
+      const name = el && el.getAttribute ? (el.getAttribute('name') || el.getAttribute('id') || '') : '';
+      if (!name) return false;
+      const host = root.document.documentElement;
+      host.removeAttribute('data-cq-ue-ok');
+      host.dispatchEvent(new root.CustomEvent('__cq_set_ue', { detail: { name, id: name, text }, bubbles: true }));
+      return host.getAttribute('data-cq-ue-ok') === '1';
+    } catch (e) { return false; }
+  }
+
+  function blankNo(li) {
+    const fb = li && li.querySelector ? li.querySelector('.fb') : null;
+    if (fb) {
+      const m = String(fb.textContent || fb.innerText || '').match(/第\s*(\d+)\s*空/);
+      if (m) return parseInt(m[1], 10);
+    }
+    return -1;
+  }
+
+  function setNativeValue(t, str) {
+    try {
+      const proto = t.tagName === 'TEXTAREA' ? root.HTMLTextAreaElement.prototype : root.HTMLInputElement.prototype;
+      const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+      if (desc && desc.set) desc.set.call(t, str); else t.value = str;
+      return true;
+    } catch (e) { try { t.value = str; return true; } catch (e2) { return false; } }
+  }
+
   function fillText(q, answer) {
     let items = (answer || []).map(x => String(x).trim()).filter(x => x !== '');
     if (!items.length) return false;
+    //  学习通 作业(.Zy_ulTk)/考试(.Cy_ulTk) 填空题：每个空位是 .XztiHover1（span.fb 标「第N空」，内含 input.inp 或 UEditor textarea）
+    if (q.el && q.el.querySelectorAll) {
+      const blanks = Array.from(q.el.querySelectorAll('.Zy_ulTk .XztiHover1, .Cy_ulTk .XztiHover1'))
+        .map((el, i) => ({ el, i }))
+        .sort((a, b) => {
+          const na = blankNo(a.el), nb = blankNo(b.el);
+          if (na < 0 && nb < 0) return a.i - b.i;
+          if (na < 0) return 1;
+          if (nb < 0) return -1;
+          return (na - nb) || (a.i - b.i);
+        })
+        .map(x => x.el);
+      if (blanks.length) {
+        let ok = false;
+        blanks.forEach((li, i) => {
+          const v = items[i];
+          if (v == null || v === '') return;
+          const inp = li.querySelector ? (li.querySelector('input.inp') || li.querySelector('input[type=text], input:not([type])')) : null;
+          if (inp && !inp.disabled) {
+            if (setNativeValue(inp, v)) { fire(inp, 'input'); fire(inp, 'change'); ok = true; }
+            return;
+          }
+          const ta = li.querySelector ? li.querySelector('textarea') : null;
+          if (ta && !ta.disabled) {
+            if (pageSetUE(ta, v)) { ok = true; return; }
+            const fr = li.querySelector('iframe.edui-body-frame');
+            if (fr) { if (fillTextEl(fr, v)) ok = true; return; }
+            if (fillTextEl(ta, v)) ok = true;
+          }
+        });
+        return ok;
+      }
+    }
     let texts = (q.els.texts || []).filter(usable);
     if (!texts.length && q.el) texts = Array.from(q.el.querySelectorAll('textarea,input[type=text],iframe.edui-body-frame,.edui-container,[contenteditable="true"]')).filter(usable);
     if (!texts.length) return false;
@@ -217,7 +293,7 @@
       if (ta) return fillTextEl(ta, str);
     }
     // 1) UEditor iframe
-    if (t.tagName === 'IFRAME' && /edui/i.test(t.className || '')) {
+    if (t.tagName === 'IFRAME' && (/edui/i.test(t.className || '') || /^ueditor/i.test(t.id || '') || /edui/i.test((t.parentElement && t.parentElement.className) || ''))) {
       try {
         const doc = t.contentDocument;
         if (doc && doc.body) {
@@ -238,6 +314,8 @@
         }
       } catch (e) { /* ignore */ }
     }
+    // 2b) 页面主世界 UE 桥（isolated world 拿不到页面 UE 对象）
+    if (pageSetUE(t, str)) return true;
     // 3) contenteditable
     if (t.isContentEditable || (t.getAttribute && t.getAttribute('contenteditable') === 'true')) {
       t.textContent = str;
@@ -246,14 +324,11 @@
     }
     // 4) textarea / input
     if (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT') {
-      try {
-        const proto = t.tagName === 'TEXTAREA' ? root.HTMLTextAreaElement.prototype : root.HTMLInputElement.prototype;
-        const desc = Object.getOwnPropertyDescriptor(proto, 'value');
-        if (desc && desc.set) desc.set.call(t, str); else t.value = str;
-      } catch (e) { t.value = str; }
-      fire(t, 'input');
-      fire(t, 'change');
-      return true;
+      if (setNativeValue(t, str)) {
+        fire(t, 'input');
+        fire(t, 'change');
+        return true;
+      }
     }
     return false;
   }

@@ -7,7 +7,7 @@
   if (CQ.__constantsLoaded) return;
   CQ.__constantsLoaded = true;
 
-  CQ.VERSION = '1.3.1';
+  CQ.VERSION = '1.3.3';
   CQ.NS = 'cq-ai-answer';
 
   CQ.MSG = {

@@ -36,6 +36,12 @@
       if (isTop || scan.questions.length) {
         state.panelMounted = true;
         CQ.panel.mount({ cfg: state.cfg });
+        CQ.panel.onConfig = c => {
+          if (c && typeof c === 'object') {
+            state.cfg = { ...(state.cfg || {}), ...c };
+            updateUi();
+          }
+        };
         bindPanel();
         updateUi();
       }

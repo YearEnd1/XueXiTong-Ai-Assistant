@@ -77,6 +77,8 @@
   }
 
   P.mount = function (opts) {
+    const orphan = document.getElementById('cq-ai-panel-host');
+    if (orphan && orphan !== host) orphan.remove(); // 扩展重载后孤儿世界的残留面板
     if (host && host.isConnected) return;
     cfg = opts.cfg || CQ.DEFAULT_CONFIG;
     host = document.createElement('div');
@@ -181,7 +183,7 @@
       els.min.textContent = collapsed ? '+' : '−';
       CQ.store.get().then(c => CQ.store.set({ ...c, uiCollapsed: collapsed }));
     });
-    els.close.addEventListener('click', () => P.destroy());
+    els.close.addEventListener('click', () => { P.destroy(); if (P.onClose) P.onClose(); });
     els.master.addEventListener('change', async () => {
       const c = await CQ.store.get();
       const nc = { ...c, masterEnabled: els.master.checked };

@@ -7,7 +7,7 @@
   if (CQ.__constantsLoaded) return;
   CQ.__constantsLoaded = true;
 
-  CQ.VERSION = '1.3.3';
+  CQ.VERSION = '1.3.4';
   CQ.NS = 'cq-ai-answer';
 
   CQ.MSG = {
@@ -21,6 +21,7 @@
     CACHE_SET: 'cq:cache-set',
     CACHE_CLEAR: 'cq:cache-clear',
     OPEN_OPTIONS: 'cq:open-options',
+    PANEL_DECIDE: 'cq:panel-decide',
     PAGE_CMD: 'cq:page-cmd',
     TOAST: 'cq:toast'
   };

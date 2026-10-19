@@ -9,7 +9,7 @@
   const U = CQ.util;
   const state = {
     cfg: null, scan: null, det: null, map: new Map(),
-    answering: false, autoSig: null, panelMounted: false
+    answering: false, autoSig: null, panelMounted: false, panelClosed: false
   };
 
   const isTop = root.top === root; // 仅顶层窗口常驻悬浮窗
@@ -32,20 +32,10 @@
       let scan = null;
       try { scan = CQ.extractor.scan(document); } catch (e) { scan = { questions: [], kind: '识别异常' }; }
       state.scan = scan;
-      // 悬浮窗：顶层窗口常驻；子框架仅识别到题目时挂载（避免每个 iframe 都弹面板）
-      if (isTop || scan.questions.length) {
-        state.panelMounted = true;
-        CQ.panel.mount({ cfg: state.cfg });
-        CQ.panel.onConfig = c => {
-          if (c && typeof c === 'object') {
-            state.cfg = { ...(state.cfg || {}), ...c };
-            updateUi();
-          }
-        };
-        bindPanel();
-        updateUi();
-      }
-      report(det, state.scan);
+      // 悬浮窗仲裁：每个标签页只显示一个面板（题目最多的框架优先，无题时顶层常驻）
+      report(det, state.scan); // 先上报，后台据此仲裁归属
+      const wait = !isTop ? 300 : (scan.questions.length ? 0 : 600);
+      setTimeout(() => decidePanel(), wait);
 
       const mo = new MutationObserver(U.debounce(() => rescan(), 1200));
       mo.observe(document.documentElement, { childList: true, subtree: true });
@@ -57,6 +47,44 @@
       chrome.runtime.onMessage.addListener(onMessage);
     } catch (e) {
       try { toast('初始化失败：' + e.message, 'err'); } catch (e2) { /* ignore */ }
+    }
+  }
+
+  /* ---------- 悬浮窗挂载（由后台仲裁：每标签页唯一） ---------- */
+  function mountPanel() {
+    if (state.panelClosed) return; // 用户点过关闭，刷新页面前不再自动弹出
+    if (state.panelMounted && CQ.panel.mounted()) return;
+    state.panelMounted = true;
+    CQ.panel.mount({ cfg: state.cfg });
+    CQ.panel.onConfig = c => {
+      if (c && typeof c === 'object') {
+        state.cfg = { ...(state.cfg || {}), ...c };
+        updateUi();
+      }
+    };
+    CQ.panel.onClose = () => { state.panelMounted = false; state.panelClosed = true; };
+    bindPanel();
+    updateUi();
+  }
+
+  function unmountPanel() {
+    state.panelMounted = false;
+    try { CQ.panel.destroy(); } catch (e) { /* ignore */ }
+  }
+
+  async function decidePanel() {
+    try {
+      const r = await U.safeSend({ type: CQ.MSG.PANEL_DECIDE, count: (state.scan && state.scan.questions.length) || 0 });
+      if (r && r.ok) {
+        if (r.mount) mountPanel();
+        else if (state.panelMounted) unmountPanel();
+      } else if (!r) {
+        if (isTop || (state.scan && state.scan.questions.length)) mountPanel();
+      }
+    } catch (e) {
+      const msg = String((e && e.message) || e);
+      if (/context invalidated|cannot access chrome/i.test(msg)) { unmountPanel(); return; } // 孤儿世界：清掉死面板
+      if (isTop || (state.scan && state.scan.questions.length)) mountPanel(); // 后台不可达时按旧逻辑兜底
     }
   }
 
@@ -72,6 +100,7 @@
     if (scan.questions.length !== prev) {
       updateUi();
       report(det, scan);
+      decidePanel();
       const sig = sigOf(scan.questions);
       if (state.cfg.autoAnswer && state.cfg.masterEnabled !== false && scan.questions.length && sig !== state.autoSig) {
         state.autoSig = sig;
@@ -312,6 +341,8 @@
     (async () => {
       let r = { ok: true };
       switch (msg.cmd) {
+        case 'mount': mountPanel(); break;
+        case 'unmount': unmountPanel(); break;
         case 'rescan': rescan(); break;
         case 'answer': await answerFlow(); break;
         case 'apply':

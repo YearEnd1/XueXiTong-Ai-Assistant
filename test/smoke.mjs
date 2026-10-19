@@ -82,5 +82,6 @@ ok('config: autoNext default off', CQ.DEFAULT_CONFIG.autoNext === false);
 ok('config: masterEnabled default on', CQ.DEFAULT_CONFIG.masterEnabled === true);
 ok('prompt: fill blanks count rule', CQ.PROMPT.system.includes('blanks 字段一致'));
 
+ok('msg: 悬浮窗仲裁消息', CQ.MSG.PANEL_DECIDE === 'cq:panel-decide');
 console.log(failed ? `SMOKE FAILED: ${failed}` : 'SMOKE ALL PASS');
 process.exit(failed ? 1 : 0);

@@ -55,6 +55,7 @@ async function handle(type, msg, sender) {
     case CQ.MSG.CACHE_CLEAR: await chrome.storage.local.remove(CQ.CACHE_KEY); return { ok: true };
     case CQ.MSG.REPORT: return reportTab(msg, sender);
     case CQ.MSG.TAB_STATUS: return tabStatus(msg.tabId);
+    case CQ.MSG.PANEL_DECIDE: return panelDecide(msg, sender);
     case CQ.MSG.OPEN_OPTIONS: chrome.runtime.openOptionsPage(); return null;
     default: return null;
   }
@@ -103,6 +104,44 @@ async function reportTab(msg, sender) {
   await chrome.storage.session.set({ cqTabs: tabs });
   await updateBadge(tabId, tabs[tabId]);
   return { ok: true };
+}
+
+/* ---------- 悬浮窗仲裁：每个标签页只保留一个面板 ---------- */
+function pickPanelOwner(frames) {
+  const list = Object.values(frames || {});
+  if (!list.length) return null;
+  const withQ = list.filter(f => (f.count || 0) > 0)
+    .sort((a, b) => (b.count - a.count) || ((a.frameId || 0) - (b.frameId || 0)));
+  if (withQ.length) return withQ[0].frameId; // 题目最多的框架优先，平局顶层在前
+  const top = list.find(f => f.frameId === 0);
+  return top ? 0 : null; // 无题时顶层常驻；顶层未运行脚本则不挂
+}
+
+async function panelDecide(msg, sender) {
+  const tabId = sender.tab && sender.tab.id;
+  if (!tabId) return { ok: false, mount: false };
+  const frameId = (sender.frameId === undefined || sender.frameId === null) ? 0 : sender.frameId;
+  const data = await chrome.storage.session.get('cqTabs');
+  const tabs = data.cqTabs || {};
+  const t = tabs[tabId] || { frames: {} };
+  if (!t.frames[frameId]) t.frames[frameId] = { tabId, frameId, at: Date.now(), kind: 'unknown', count: 0 };
+  t.frames[frameId].at = Date.now();
+  if (typeof msg.count === 'number') t.frames[frameId].count = msg.count; // 以决策时刻框架自报题数为准
+  tabs[tabId] = t;
+  await chrome.storage.session.set({ cqTabs: tabs });
+  const owner = pickPanelOwner(t.frames);
+  const ps = await chrome.storage.session.get('cqPanels');
+  const panels = ps.cqPanels || {};
+  const prevOwner = Object.prototype.hasOwnProperty.call(panels, tabId) ? panels[tabId] : undefined;
+  panels[tabId] = owner;
+  await chrome.storage.session.set({ cqPanels: panels });
+  if (prevOwner !== undefined && prevOwner !== null && prevOwner !== owner) {
+    try { await chrome.tabs.sendMessage(tabId, { type: CQ.MSG.PAGE_CMD, cmd: 'unmount' }, { frameId: prevOwner }); } catch (e) { /* 框架可能已销毁 */ }
+  }
+  if (owner !== null && owner !== undefined && owner !== prevOwner) {
+    try { await chrome.tabs.sendMessage(tabId, { type: CQ.MSG.PAGE_CMD, cmd: 'mount' }, { frameId: owner }); } catch (e) { /* ignore */ }
+  }
+  return { ok: true, mount: owner === frameId };
 }
 
 async function tabStatus(tabId) {

@@ -74,11 +74,13 @@
 
   async function decidePanel() {
     try {
-      const r = await U.safeSend({ type: CQ.MSG.PANEL_DECIDE, count: (state.scan && state.scan.questions.length) || 0 });
+      const vis = (window.innerWidth > 120 && window.innerHeight > 120);
+      const r = await U.safeSend({ type: CQ.MSG.PANEL_DECIDE, count: (state.scan && state.scan.questions.length) || 0, vis });
       if (r && r.ok) {
         if (r.mount) mountPanel();
         else if (state.panelMounted) unmountPanel();
-      } else if (!r) {
+      } else {
+        // 后台异常/超时：退回旧逻辑，保证面板不至于完全不出现
         if (isTop || (state.scan && state.scan.questions.length)) mountPanel();
       }
     } catch (e) {
@@ -341,6 +343,7 @@
     (async () => {
       let r = { ok: true };
       switch (msg.cmd) {
+        case 'ping': break; // 后台存活探测
         case 'mount': mountPanel(); break;
         case 'unmount': unmountPanel(); break;
         case 'rescan': rescan(); break;

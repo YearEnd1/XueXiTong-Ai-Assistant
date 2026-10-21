@@ -110,11 +110,28 @@ async function reportTab(msg, sender) {
 function pickPanelOwner(frames) {
   const list = Object.values(frames || {});
   if (!list.length) return null;
+  // 可见框架优先（隐藏 iframe 里常有旧章节题目），其次题目多，再顶层优先
+  const score = f => ((f.vis === false ? 0 : 1) * 10000) + Math.min(f.count || 0, 999);
   const withQ = list.filter(f => (f.count || 0) > 0)
-    .sort((a, b) => (b.count - a.count) || ((a.frameId || 0) - (b.frameId || 0)));
-  if (withQ.length) return withQ[0].frameId; // 题目最多的框架优先，平局顶层在前
-  const top = list.find(f => f.frameId === 0);
+    .sort((a, b) => (score(b) - score(a)) || ((a.frameId || 0) - (b.frameId || 0)));
+  if (withQ.length) return withQ[0].frameId;
+  const top = list.find(f => f.frameId === 0 && f.vis !== false);
   return top ? 0 : null; // 无题时顶层常驻；顶层未运行脚本则不挂
+}
+
+/* 探活：死框架（页面已跳转/iframe 已移除）必须从记录里剔除，否则会抢走面板归属 */
+async function pruneDeadFrames(tabId, frames, selfId) {
+  const ids = Object.keys(frames || {}).map(Number).filter(id => id !== selfId);
+  await Promise.all(ids.map(async (id) => {
+    try {
+      await Promise.race([
+        chrome.tabs.sendMessage(tabId, { type: CQ.MSG.PAGE_CMD, cmd: 'ping' }, { frameId: id }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 700))
+      ]);
+    } catch (e) {
+      delete frames[id];
+    }
+  }));
 }
 
 async function panelDecide(msg, sender) {
@@ -127,6 +144,8 @@ async function panelDecide(msg, sender) {
   if (!t.frames[frameId]) t.frames[frameId] = { tabId, frameId, at: Date.now(), kind: 'unknown', count: 0 };
   t.frames[frameId].at = Date.now();
   if (typeof msg.count === 'number') t.frames[frameId].count = msg.count; // 以决策时刻框架自报题数为准
+  t.frames[frameId].vis = msg.vis !== false;
+  await pruneDeadFrames(tabId, t.frames, frameId);
   tabs[tabId] = t;
   await chrome.storage.session.set({ cqTabs: tabs });
   const owner = pickPanelOwner(t.frames);

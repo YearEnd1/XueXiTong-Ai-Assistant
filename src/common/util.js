@@ -54,6 +54,13 @@
       const j = s.lastIndexOf(']');
       if (j > 0) candidates.push(s.slice(0, j + 1));
     }
+    // 数组开头但被截断时优先按数组修复（否则后面的 {..} 贪婪匹配会误救出半个对象）
+    if (s.startsWith('[')) {
+      const fixedArr = repairTruncatedArray(s);
+      if (fixedArr) {
+        try { return JSON.parse(fixedArr); } catch (e) { /* ignore */ }
+      }
+    }
     const mArr = s.match(/\[[\s\S]*\]/);
     if (mArr) candidates.push(mArr[0]);
     const mObj = s.match(/\{[\s\S]*\}/);
@@ -61,8 +68,49 @@
     for (const c of candidates) {
       try { return JSON.parse(c); } catch (e) { /* next */ }
     }
+    // 截断修复：输出被 max_tokens 切断时，回退到最后一个完整元素并补齐括号
+    const fixed = repairTruncatedArray(s);
+    if (fixed) {
+      try { return JSON.parse(fixed); } catch (e) { /* ignore */ }
+    }
     return null;
   };
+
+  /* 把未闭合的 JSON 数组裁到最后一个完整元素并补齐 ] */
+  function repairTruncatedArray(s) {
+    const open = s.indexOf('[');
+    if (open < 0) return null;
+    let depth = 0, inStr = false, esc = false, lastTop = -1;
+    for (let i = open; i < s.length; i++) {
+      const ch = s[i];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (ch === '\\') esc = true;
+        else if (ch === '"') inStr = false;
+        continue;
+      }
+      if (ch === '"') inStr = true;
+      else if (ch === '[' || ch === '{') depth++;
+      else if (ch === ']' || ch === '}') {
+        depth--;
+        if (depth === 0) return null; // 已正常闭合，无需修复
+        if (depth === 1) lastTop = i;
+      }
+    }
+    if (lastTop < 0) return null;
+    let out = s.slice(open, lastTop + 1);
+    let d = 0, q = false, sc = false;
+    for (let i = 0; i < out.length; i++) {
+      const ch = out[i];
+      if (q) { if (sc) sc = false; else if (ch === '\\') sc = true; else if (ch === '"') q = false; continue; }
+      if (ch === '"') q = true;
+      else if (ch === '[' || ch === '{') d++;
+      else if (ch === ']' || ch === '}') d--;
+    }
+    if (q) out += '"';
+    while (d-- > 0) out += ']';
+    return out;
+  }
 
   U.safeSend = function (msg) {
     try { return chrome.runtime.sendMessage(msg); }

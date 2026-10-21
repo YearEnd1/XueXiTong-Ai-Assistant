@@ -350,6 +350,18 @@ export async function extractText(resp, provider) {
   return { text: t, raw: JSON.stringify(data) };
 }
 
+/* {"1":"A","2":{"answer":["B"]}} 这类键值映射 → 标准数组 */
+function objectToAnswerArray(obj) {
+  if (!obj || typeof obj !== 'object') return null;
+  const keys = Object.keys(obj);
+  if (!keys.length || !keys.every(k => /^[0-9]+$/.test(k))) return null;
+  return keys.sort((a, b) => Number(a) - Number(b)).map(k => {
+    const v = obj[k];
+    if (v && typeof v === 'object') return { index: Number(k), ...v };
+    return { index: Number(k), answer: v };
+  });
+}
+
 /* 解析模型输出为按题号索引的答案映射 */
 export function parseAnswerPayload(text) {
   const CQ2 = globalThis.CQ;
@@ -358,7 +370,7 @@ export function parseAnswerPayload(text) {
     if (Array.isArray(data.answers)) data = data.answers;
     else if (Array.isArray(data.result)) data = data.result;
     else if (Array.isArray(data.data)) data = data.data;
-    else data = null;
+    else data = objectToAnswerArray(data);
   }
   if (!Array.isArray(data)) return { ok: false, raw: String(text), error: '输出不是 JSON 数组' };
 

@@ -223,7 +223,7 @@ async function answerBatch(questions) {
       try {
         const rc = new AbortController();
         const rt = setTimeout(() => rc.abort(), cfg.timeoutMs);
-        const r2 = await callProvider(cfg, sys, retryUser, miss, rc.signal);
+        const r2 = await callProvider({ ...cfg, maxTokens: Math.max(cfg.maxTokens || 0, 4096) }, sys, retryUser, miss, rc.signal);
         clearTimeout(rt);
         if (r2.ok) {
           const o2 = await extractText(r2, cfg.provider);
@@ -246,7 +246,7 @@ async function answerBatch(questions) {
       try {
         const cc = new AbortController();
         const ct = setTimeout(() => cc.abort(), cfg.timeoutMs);
-        const r3 = await callProvider(cfg, sys, partUser, part, cc.signal);
+        const r3 = await callProvider({ ...cfg, maxTokens: Math.max(cfg.maxTokens || 0, 4096) }, sys, partUser, part, cc.signal);
         clearTimeout(ct);
         if (r3.ok) {
           const o3 = await extractText(r3, cfg.provider);

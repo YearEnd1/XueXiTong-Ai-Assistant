@@ -83,5 +83,13 @@ ok('config: masterEnabled default on', CQ.DEFAULT_CONFIG.masterEnabled === true)
 ok('prompt: fill blanks count rule', CQ.PROMPT.system.includes('blanks 字段一致'));
 
 ok('msg: 悬浮窗仲裁消息', CQ.MSG.PANEL_DECIDE === 'cq:panel-decide');
+ok('parse: truncated array repaired', (() => {
+  const r = parseAnswerPayload('[{"index":1,"answer":["A"],"confidence":0.9},{"index":2,"answ');
+  return r.ok && r.map.get(1).answer[0] === 'A';
+})());
+ok('parse: numeric-key object mapping', (() => {
+  const r = parseAnswerPayload('{"1":"A","2":{"answer":["B"]}}');
+  return r.ok && r.map.get(1).answer[0] === 'A' && r.map.get(2).answer[0] === 'B';
+})());
 console.log(failed ? `SMOKE FAILED: ${failed}` : 'SMOKE ALL PASS');
 process.exit(failed ? 1 : 0);

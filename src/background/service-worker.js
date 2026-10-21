@@ -215,7 +215,26 @@ async function answerBatch(questions) {
     parsed.error = 'API 返回 ' + resp.status + '：' + detail;
   } else {
     const out = await extractText(resp, cfg.provider);
-    parsed = parseAnswerPayload(out.text);
+    let textOut = out.text;
+    if (isHtmlPayload(textOut)) {
+      // 常见配置错误：API 地址填成了网站地址 → 自动补 /v1 再试一次
+      const alt = altBaseUrl(cfg.baseUrl);
+      if (alt && alt !== cfg.baseUrl) {
+        try {
+          const ac = new AbortController();
+          const at = setTimeout(() => ac.abort(), cfg.timeoutMs);
+          const r4 = await callProvider({ ...cfg, baseUrl: alt }, sys, user, miss, ac.signal);
+          clearTimeout(at);
+          if (r4.ok) {
+            const o4 = await extractText(r4, cfg.provider);
+            if (!isHtmlPayload(o4.text)) textOut = o4.text;
+          }
+        } catch (e) { /* ignore */ }
+      }
+    }
+    parsed = isHtmlPayload(textOut)
+      ? { ok: false, raw: textOut, error: '返回的是网页 HTML 而不是 API 数据：API 地址可能填成了网站地址。中转站接口地址通常以 /v1 结尾（如 https://xxx.com/v1），请修改后重试。' }
+      : parseAnswerPayload(textOut);
 
     // 解析失败重试一次（把上次原文附上）
     if (!parsed.ok) {
@@ -354,6 +373,17 @@ async function answerBatch(questions) {
   return { ok: true, map, cached: 0, raw: parsed.raw, model: cfg.model, verify: verifyStat };
 }
 
+/* 中转站把网站首页当接口返回 HTML 时的识别与备用地址 */
+function isHtmlPayload(text) {
+  return /^\s*<(!doctype|html|\?xml|head|body)/i.test(String(text || '').slice(0, 200));
+}
+function altBaseUrl(base) {
+  const b = String(base || '').trim().replace(/\/+$/, '');
+  if (!b) return b;
+  if (/\/v\d+[a-z]*$/i.test(b)) return b;
+  return b + '/v1';
+}
+
 async function testConnection(cfgRaw) {
   const cfg = CQ.store.normalize(cfgRaw);
   const q = [{ index: 1, type: 'single', stem: '中国的首都是哪座城市？', options: [{ key: 'A', label: '上海' }, { key: 'B', label: '北京' }, { key: 'C', label: '广州' }] }];
@@ -369,6 +399,9 @@ async function testConnection(cfgRaw) {
       return { ok: false, error: `HTTP ${resp.status}：${detail}` };
     }
     const out = await extractText(resp, cfg.provider);
+    if (isHtmlPayload(out.text)) {
+      return { ok: false, error: '返回的是网页 HTML 而不是 API 数据：API 地址可能填成了网站地址。中转站接口地址通常以 /v1 结尾（如 https://xxx.com/v1）。' };
+    }
     const parsed = parseAnswerPayload(out.text);
     if (!parsed.ok) return { ok: false, error: '连通成功但输出解析失败：' + out.text.slice(0, 300) };
     const v = parsed.map.get(1);
